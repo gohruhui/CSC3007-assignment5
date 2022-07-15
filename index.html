@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>CSC3007 - Assignment 5</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.8.0/leaflet.css"
+    />
+    <style>
+      /* slide 5 */
+      #map {
+        width: 1000px;
+        height: 600px;
+      }
+      .labelstyle {
+        color: black;
+        /* font-size: 14px; */
+        font-weight: 1000;
+        text-shadow: 1px 1px #fff;
+        fillcolor: none;
+        fillopacity: 0;
+        background-color: none;
+        border-color: none;
+        background: none;
+        border: none;
+        box-shadow: none;
+        cursor: none;
+        interactive: false;
+        fill: false;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Leaflet x Hourly PSI</h1>
+    <div id="map"></div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.8.0/leaflet.js"></script>
+    <script>
+      //Get PSI data from datagov
+      fetch("https://api.data.gov.sg/v1/environment/psi")
+        .then((response) => response.json())
+        // .then(data => console.log(data.items[0].timestamp));
+        .then(function (data) {
+          console.log(data);
+          //   console.log(data.region_metadata[0]["name"]);
+          //   console.log(data.region_metadata[0]["label_location"]["latitude"]);
+          //   console.log(data.items[0]);
+
+          //Use SLA tile map
+          let tiles = new L.tileLayer(
+            "https://maps-{s}.onemap.sg/v3/Default/{z}/{x}/{y}.png",
+            {
+              detectRetina: true,
+              maxZoom: 18, //need set or too small to see sg's
+              minZoom: 11,
+              //Do not remove this attribution
+              attribution:
+                '<img src="https://docs.onemap.sg/maps/images/oneMap64-01.png" style="height:20px;width:20px;">' +
+                'New OneMap | Map data © contributors, <a href="http://SLA.gov.sg">Singapore Land Authority</a>',
+            }
+          );
+
+          //Set boundaries so will bounce back if scroll beyond
+          let map = new L.Map("map", {
+            center: [1.347833, 103.809357],
+            zoom: 11,
+            maxBounds: L.latLngBounds(
+              L.latLng(1.1, 103.5),
+              L.latLng(1.5, 104.3)
+            ),
+          }).addLayer(tiles);
+
+          //create obj to store
+
+          var sData = [];
+          //go through data
+          for (const outerL in data) {
+            console.log(data[outerL]);
+
+            //Region metadata
+            if (outerL === "region_metadata") {
+              console.log("found region meta data");
+
+              //Loop through region_metadata get latlong
+              for (const rkey in data[outerL]) {
+                // console.log(data.region_metadata[rkey]["name"]);
+                // console.log(
+                //   "Lat" + data.region_metadata[rkey]["label_location"]["latitude"]
+                // );
+                // console.log(
+                //   "Long" + data.region_metadata[rkey]["label_location"]["longitude"]
+                // );
+                var name = data[outerL][rkey]["name"];
+                var lat = data[outerL][rkey]["label_location"]["latitude"];
+                var long = data[outerL][rkey]["label_location"]["longitude"];
+                console.log(name + ": " + lat + "," + long);
+
+                //temp
+                var element = {};
+                element.area = name;
+                // element.latLong = lat + ", " + long;
+                element.lat = lat;
+                element.long = long;
+                //add to obj
+                // sData.push({ element: element });
+                sData.push({ element });
+
+                //check
+              }
+            } //end region_metadata
+
+            console.log("check sData");
+            console.log(sData);
+            for (var item in sData) {
+              console.log(sData[item]);
+            }
+            console.log(sData[0]["element"]);
+            console.log(sData[0]["element"]["area"]);
+
+            //Items for PSI reading
+            if (outerL === "items") {
+              console.log("itemss");
+              // console.log(data[outerL]);
+              console.log(
+                data[outerL][0]["readings"]["psi_twenty_four_hourly"]
+              );
+              for (const re in data[outerL][0]["readings"][
+                "psi_twenty_four_hourly"
+              ]) {
+                if (re === "west") {
+                  for (var item in sData) {
+                    if (sData[item]["element"]["area"] === re) {
+                      sData[item]["element"].reading =
+                        data[outerL][0]["readings"]["psi_twenty_four_hourly"][
+                          re
+                        ];
+                    } //if found, add
+                  } //loop through sData
+                } //west
+                if (re === "national") {
+                  for (var item in sData) {
+                    if (sData[item]["element"]["area"] === re) {
+                      sData[item]["element"].reading =
+                        data[outerL][0]["readings"]["psi_twenty_four_hourly"][
+                          re
+                        ];
+                    } //if found, add
+                  } //loop through sData
+                } //national
+                if (re === "east") {
+                  for (var item in sData) {
+                    if (sData[item]["element"]["area"] === re) {
+                      sData[item]["element"].reading =
+                        data[outerL][0]["readings"]["psi_twenty_four_hourly"][
+                          re
+                        ];
+                    } //if found, add
+                  } //loop through sData
+                } //east
+                if (re === "central") {
+                  for (var item in sData) {
+                    if (sData[item]["element"]["area"] === re) {
+                      sData[item]["element"].reading =
+                        data[outerL][0]["readings"]["psi_twenty_four_hourly"][
+                          re
+                        ];
+                    } //if found, add
+                  } //loop through sData
+                } //central
+                if (re === "south") {
+                  for (var item in sData) {
+                    if (sData[item]["element"]["area"] === re) {
+                      sData[item]["element"].reading =
+                        data[outerL][0]["readings"]["psi_twenty_four_hourly"][
+                          re
+                        ];
+                    } //if found, add
+                  } //loop through sData
+                } //south
+                if (re === "north") {
+                  for (var item in sData) {
+                    if (sData[item]["element"]["area"] === re) {
+                      sData[item]["element"].reading =
+                        data[outerL][0]["readings"]["psi_twenty_four_hourly"][
+                          re
+                        ];
+                    } //if found, add
+                  } //loop through sData
+                } //north
+                console.log(
+                  data[outerL][0]["readings"]["psi_twenty_four_hourly"][re]
+                );
+              } //for loop
+              //NOTE: add to some array
+            } //end items for PSI reading
+
+            console.log("check againnn");
+            console.log(sData);
+            //API Info
+            if (outerL === "api_info") {
+              console.log("yupp");
+            } //end api_info
+            console.log("end test");
+          } //go through PSI data
+
+          //add marker and bind
+          // let marker = L.marker([1.3775674706920313, 103.84876554003246]).addTo(
+          //   map
+          // );
+          // marker.bindPopup("<b>SIT NYP campus</b>");
+
+          //loop through object and add marker accordingly
+          console.log("loop");
+          for (var item in sData) {
+            if (sData[item]["element"].area !== "national") {
+              // var latLong = sData[item]["element"].latLong;
+              // console.log(latLong);
+              // let marker = L.marker([
+              //   sData[item]["element"].lat,
+              //   sData[item]["element"].long,
+              // ]).addTo(map);
+
+              //check reading and change colour according to https://www.haze.gov.sg/images/default-source/health-advisory-images/how-to-plan-outdoor-activities.jpg
+              var mColour = "";
+              console.log("Reading: " + sData[item]["element"].reading);
+              if (parseInt(sData[item]["element"].reading) <= 50) {
+                mColour = "green";
+              } else if (parseInt(sData[item]["element"].reading) <= 100) {
+                mColour = "blue";
+              } else if (parseInt(sData[item]["element"].reading) <= 200) {
+                mColour = "yellow";
+              } else if (parseInt(sData[item]["element"].reading) <= 300) {
+                mColour = "orange";
+              } else if (parseInt(sData[item]["element"].reading) > 300) {
+                mColour = "red";
+              }
+
+              console.log("check Colour: " + mColour);
+              let marker = L.circleMarker([
+                sData[item]["element"].lat,
+                sData[item]["element"].long,
+              ]).addTo(map);
+              marker.setStyle({
+                fillColor: mColour,
+                color: mColour,
+                opacity: "50%",
+                radius: "25",
+              });
+              var tempReading = "" + sData[item]["element"].reading + "";
+              var text = L.tooltip({
+                permanent: true,
+                direction: "center",
+                className: "labelstyle",
+              })
+                .setContent(tempReading)
+                .setLatLng(marker.getLatLng());
+              text.addTo(map);
+
+              marker.bindPopup(
+                "<b>Area: " +
+                  sData[item]["element"].area +
+                  "<br/>LatLong: " +
+                  sData[item]["element"].lat +
+                  ", " +
+                  sData[item]["element"].long +
+                  "<br/> Reading: " +
+                  sData[item]["element"].reading +
+                  "</b>"
+              );
+            }
+            // console.log(
+            //   sData[item]["element"].area +
+            //     " " +
+            //     sData[item]["element"].latLong +
+            //     " " +
+            //     sData[item]["element"].reading
+            // );
+          }
+        }); //fetch-then
+    </script>
+  </body>
+</html>
